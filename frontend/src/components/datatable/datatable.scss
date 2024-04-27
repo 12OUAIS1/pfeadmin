@@ -1,0 +1,42 @@
+.d {
+    height: 200px;
+    padding: 20px;
+   
+  }
+  #btn {
+   width: 150px;
+   padding: 10px;
+   border: none;
+   background-color: teal;
+   color: white;
+   font-weight: bold;
+   cursor: pointer;
+   margin-top: 10px;
+   margin-left: 10px;
+   margin-bottom: 10px;
+   
+ }
+  .cellaction {
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    .viewbtn {
+        padding: 2px 5px;
+        border-radius: 5px;
+        color: darkblue;
+       cursor: pointer;
+      }
+     .deletebtn{
+        padding: 2px 5px;
+        border-radius: 5px;
+        color: crimson;
+        cursor: pointer;
+        
+       
+       
+     }
+  }
+  
+ 
+  

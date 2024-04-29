@@ -1,17 +1,76 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "./newadmin.scss";
 import Sidebar from '../../components/sidebar/Sidebar';
 import Navbar from '../../components/navbar/Navbar';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
+import axios from 'axios';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import app from '../../firebase';
 
 const Newadmin = () => {
     const [file, setFile] = useState(null);
+    const [imgperc, setImageperc] = useState(0);
+    const [inputs, setInputs] = useState({
+        imgUrl: '' // Initialize imgUrl as an empty string
+    });
+
+    useEffect(() => {
+        if (file) {
+            uploadFile(file);
+        }
+    }, [file]);
+
+    const uploadFile = async (file) => {
+        try {
+            const storage = getStorage(app);
+            const storageRef = ref(storage, `images/${file.name}`);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+
+            uploadTask.on(
+                "state_changed",
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    setImageperc(Math.round(progress));
+                },
+                (error) => {
+                    console.log("Upload Error:", error);
+                },
+                async () => {
+                    try {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        setInputs((prev) => ({
+                            ...prev,
+                            imgUrl: downloadURL
+                        }));
+                    } catch (error) {
+                        console.log("Download URL Error:", error);
+                    }
+                }
+            );
+        } catch (error) {
+            console.log("Storage Error:", error);
+        }
+    };
 
     const handleFileChange = (e) => {
-        // Access the first file from the array of selected files
         const selectedFile = e.target.files[0];
         setFile(selectedFile);
     };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            console.log("Inputs:", inputs);
+            if (inputs.imgUrl.trim() !== '') {
+                await axios.post("http://localhost:2000/api/v6/image", { imgUrl: inputs.imgUrl }); // Send imgUrl in the request body
+            } else {
+                console.error('Invalid imgUrl:', inputs.imgUrl);
+            }
+        } catch (error) {
+            console.log("Submit Error:", error);
+        }
+    };
+    
 
     return (
         <div className='newadmin'>
@@ -19,7 +78,7 @@ const Newadmin = () => {
             <div className="newadmincontainer">
                 <Navbar />
                 <div className="top">
-                    <h1>add new admin</h1>
+                    <h1>Add New Admin</h1>
                 </div>
                 <div className="bottom">
                     <div className="left">
@@ -29,48 +88,13 @@ const Newadmin = () => {
                         />
                     </div>
                     <div className="right">
-                        <form action="">
+                        <form onSubmit={handleSubmit}>
                             <div className="forminput">
                                 <label htmlFor="file"><NoteAddIcon className='icon' /></label>
-                                <input type="file" id='file' onChange={handleFileChange} />
+                                <input type="file" id='file' accept='image/*' onChange={handleFileChange} />
+                                <label htmlFor="file">Image:</label> {imgperc > 0 && `Uploading ${imgperc}%`}
                             </div>
-                            <div className="forminput">
-                                <label htmlFor="">Name</label>
-                                <input type="text" placeholder='John' />
-                            </div>
-                            <div className="forminput">
-                                <label htmlFor="">Last Name</label>
-                                <input type="text" placeholder='Doe' />
-                            </div>
-                            <div className="forminput">
-                                <label htmlFor="">Email</label>
-                                <input type="text" placeholder='john@example.com' />
-                            </div>
-                            <div className="forminput">
-                                <label htmlFor="">Phone</label>
-                                <input type="text" placeholder='123-456-7890' />
-                            </div>
-                            <div className="forminput">
-                                <label htmlFor="">Password</label>
-                                <input type="password" placeholder='********' />
-                            </div>
-                            <div className="forminput">
-                                <label htmlFor="">Address</label>
-                                <input type="text" placeholder='123 Main St, City' />
-                            </div>
-                            <div className="forminput">
-                                <label htmlFor="">ID Number</label>
-                                <input type="text" placeholder='ID123456' />
-                            </div>
-                            <div className="forminput">
-                                <label htmlFor="">Rank</label>
-                                <input type="text" placeholder='Admin' />
-                            </div>
-                            <div className="forminput">
-                                <label htmlFor="">Badge Number</label>
-                                <input type="text" placeholder='123' />
-                            </div>
-                            <button>Send</button>
+                            <button type="submit">Send</button>
                         </form>
                     </div>
                 </div>

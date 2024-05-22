@@ -1,100 +1,57 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
 const bcrypt = require("bcrypt");
 const Admin = require("../models/Admin");
 
-// Multer configuration for image upload
-/*const imgConfig = multer.diskStorage({
-    destination: (req, file, callback) => {
-        callback(null, "./uploads");
-    },
-    filename: (req, file, callback) => {
-        callback(null, `image-${Date.now()}.${file.originalname}`);
-    }
-});
 
-// Filter for image files
-const isImage = (req, file, callback) => {
-    if (file.mimetype.startsWith("image")) {
-        callback(null, true);
-    } else {
-        callback(new Error("Only images are allowed"));
-    }
-};
 
-const upload = multer({
-    storage: imgConfig,
-    fileFilter: isImage
-}).single("photo");
 
-// Admin Sign-Up route
-router.post("/admin/signup", upload, async (req, res) => {
+router.post("/admin/signup", async (req, res) => {
     try {
-        const { email, password, nom_complet, phone, address, idNumber, rank, badgeNumber } = req.body;
-        const photo = req.file ? req.file.filename : ''; // Get uploaded photo filename
+        const { email, password, nom_complet, phone, address, idNumber, rank, badgeNumber, imgUrl } = req.body;
 
-        // Check if required fields are provided
-        if (!email || !password || !nom_complet || !phone || !address || !idNumber || !rank || !badgeNumber) {
-            return res.status(400).json({ message: "Please fill all required fields" });
-        }
-
-        // Check if admin with the same email already exists
+        // Check if admin already exists
         const existingAdmin = await Admin.findOne({ email });
         if (existingAdmin) {
             return res.status(400).json({ message: "Admin already exists with this email" });
         }
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create new admin instance
-        const admin = new Admin({
-            email,
-            password: hashedPassword,
-            nom_complet,
-            phone,
-            address,
-            idNumber,
-            rank,
-            badgeNumber,
-            photo
-        });
-
-        // Save admin to database
-        const savedAdmin = await admin.save();
-
-        res.status(201).json({ message: "Admin signed up successfully", admin: savedAdmin });
-    } catch (error) {
-        console.error("Error signing up admin:", error);
-        res.status(500).json({ message: "Error signing up admin" });
-    }
-});*/
-
-
-/*router.post("/admin/signup", async (req, res) => {
-    try {
-        const { emaila, password, nom_complet } = req.body;
-        const existingAdmin = await Admin.findOne({ emaila });
-        if (existingAdmin) {
-            return res.status(400).json({ message: "Admin already exists with this email" });
+        // Check if imgUrl is provided
+        if (!imgUrl) {
+            return res.status(400).json({ success: false, error: "imgUrl is required" });
         }
+
+        // Hash the password
         const salt = bcrypt.genSaltSync(10);
         const hashpass = bcrypt.hashSync(password, salt);
-        const admin = new Admin({ emaila, password: hashpass, nom_complet });
+
+        // Create the admin
+        const admin = new Admin({ 
+            email, 
+            password: hashpass, 
+            nom_complet, 
+            phone, 
+            address, 
+            idNumber, 
+            rank, 
+            badgeNumber, 
+            imgUrl 
+        });
         const savedAdmin = await admin.save();
-        res.status(201).json({ admin: savedAdmin });
+
+        // Send response
+        res.status(201).json({ success: true, admin: savedAdmin });
     } catch (error) {
         console.error("Error signing up admin:", error.message);
         res.status(500).json({ message: "Error signing up admin", error: error.message });
     }
-});*/
+});
 
 // Admin Login
 router.post("/admin/login", async (req, res) => {
     try {
-        const { emaila, password } = req.body;
-        const admin = await Admin.findOne({ emaila });
+        const { email, password } = req.body;
+        const admin = await Admin.findOne({ email });
         if (!admin) {
             return res.status(401).json({ message: "Invalid credentials" });
         }
@@ -109,18 +66,87 @@ router.post("/admin/login", async (req, res) => {
     }
 });
 
+
 // Get Admin Profile
-router.get("/admin/profile", async (req, res) => {
+router.get("/admin/:id", async (req, res) => {
     try {
-        // Assuming you have authentication middleware that verifies the admin's token
-        const admin = await Admin.findById(req.user.id);
-        if (!admin) {
+      // Check if req.params.id is null or undefined
+      if (!req.params.id) {
+        return res.status(400).json({ message: "ID parameter is missing" });
+      }
+  
+      const admin = await Admin.findById(req.params.id);
+      if (!admin) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.status(200).json(admin);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+  });
+  
+
+module.exports = router;
+router.get("/admin", async (req, res) => {
+    try {
+        const users = await Admin.find();
+        res.status(200).json({ users });
+    } catch (error) {
+        console.error("Error fetching users:", error.message);
+        res.status(500).json({ message: "Error fetching users", error: error.message });
+    }
+});
+
+router.delete("/deleteadmin/:adminId", async (req, res) => {
+    try {
+        const adminId = req.params.adminId;
+
+        const deletedAdmin = await Admin.findByIdAndDelete(adminId);
+
+        if (!deletedAdmin) {
             return res.status(404).json({ message: "Admin not found" });
         }
-        res.status(200).json({ admin });
+
+        res.status(200).json({ message: "Admin deleted successfully", admin: deletedAdmin });
     } catch (error) {
-        console.error("Error fetching admin profile:", error.message);
-        res.status(500).json({ message: "Error fetching admin profile", error: error.message });
+        console.error(error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+});
+
+// Update admin record by ID
+router.put("/updateadmin/:adminId", async (req, res) => {
+    try {
+        const { email, nom_complet, phone, address } = req.body;
+        const adminId = req.params.adminId;
+
+        console.log('Admin ID:', adminId); // Log adminId for debugging
+
+        // Find the admin by ID
+        const admin = await Admin.findById(adminId);
+
+        // Check if the admin exists
+        if (!admin) {
+            console.log('Admin not found'); // Log if admin not found
+            return res.status(404).json({ message: "Admin not found" });
+        }
+
+        // Update the admin fields
+        admin.email = email;
+        admin.nom_complet = nom_complet;
+        admin.phone = phone;
+        admin.address = address;
+        
+
+        // Save the updated admin
+        const updatedAdmin = await admin.save();
+
+        // Send response with the updated admin
+        res.status(200).json({ admin: updatedAdmin });
+    } catch (error) {
+        console.error('Error updating admin data:', error); // Log detailed error
+        res.status(500).json({ message: "Internal server error", error: error.message });
     }
 });
 

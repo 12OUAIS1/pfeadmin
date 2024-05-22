@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import "./newadmin.scss";
+import "./newpost.scss";
 import Sidebar from '../../components/sidebar/Sidebar';
 import Navbar from '../../components/navbar/Navbar';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
@@ -9,22 +9,16 @@ import axios from 'axios';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import app from '../../firebase';
 
-const Newadmin = () => {
+const NewPost = () => {
     const [file, setFile] = useState(null);
     const [imgperc, setImageperc] = useState(0);
     const [inputs, setInputs] = useState({
-        imgUrl: '' 
+        imgUrl: '' // Initialize imgUrl as an empty string
     });
     const [data, setData] = useState({
-        email: "",
-         password:"", 
-         nom_complet:"", 
-        phone:""
-        ,address:""
-        ,idNumber:""
-        ,rank:""
-        ,badgeNumber:""
-      });
+        title: "",
+        descreption: ""
+    });
 
     useEffect(() => {
         if (file) {
@@ -72,57 +66,45 @@ const Newadmin = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setData(prevInputs => ({
-          ...prevInputs,
-          [name]: value
+            ...prevInputs,
+            [name]: value
         }));
-      };
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Gather all form data
+           
             const formData = {
                 imgUrl: inputs.imgUrl.trim(),
-                email: data.email.trim(),
-                nom_complet: data.nom_complet.trim(),
-                password: data.password.trim(),
-                phone: data.phone.trim(),
-                address: data.address.trim(),
-                idNumber: data.idNumber.trim(),
-                rank: data.rank.trim(),
-                badgeNumber:data.badgeNumber.trim(),
+                title: data.title.trim(),
+                descreption: data.descreption.trim()
             };
 
             // Validate imgUrl
             if (formData.imgUrl === '') {
-                console.error('Invalid imgUrl:', formData.imgUrl);
+                console.error('Invalid imgUrl:', formData.imgUrl); 
                 return;
             }
 
-            // Validate other required fields
+           
             if (Object.values(formData).some(value => value === '')) {
                 console.error('All fields are required');
                 return;
             }
 
-            // Send POST request with form data
-            await axios.post("http://localhost:2000/api/v5/admin/signup", formData);
+            
+            await axios.post("http://localhost:2000/api/v7/post", formData);
 
-            // Clear input fields after successful submission
+         
             setInputs({ imgUrl: '' });
             setData({
-                email: '',
-                password: '',
-                nom_complet: '',
-                phone: '',
-                address: '',
-                idNumber: '',
-                rank: '',
-                badgeNumber: ''
+                title: '',
+                descreption: ''
             });
 
-            // Show success toast
-            toast.success('Admin successfully created!', {
+           
+            toast.success('Post successfully created!', {
                 position: toast.POSITION.TOP_CENTER
             });
 
@@ -132,12 +114,12 @@ const Newadmin = () => {
     };
 
     return (
-        <div className='newadmin'>
+        <div className='newpost'>
             <Sidebar />
-            <div className="newadmincontainer">
+            <div className="newpostcontainer">
                 <Navbar />
                 <div className="top">
-                    <h1>Add New Admin</h1>
+                    <h1>Add New Post</h1>
                 </div>
                 <div className="bottom">
                     <div className="left">
@@ -154,37 +136,13 @@ const Newadmin = () => {
                                 <label htmlFor="file">Image:</label> {imgperc > 0 && `Uploading ${imgperc}%`}
                             </div>
                             <div className="forminput">
-        <label htmlFor="nom_complet">Name</label>
-        <input type="text" id="nom_complet" name="nom_complet" placeholder="John" onChange={handleChange} value={data.nom_complet} />
-    </div>
-    <div className="forminput">
-        <label htmlFor="email">Email</label>
-        <input type="text" id="email" name="email" placeholder="john@example.com" onChange={handleChange} value={data.email} />
-    </div>
-    <div className="forminput">
-        <label htmlFor="phone">Phone</label>
-        <input type="text" id="phone" name="phone" placeholder="123-456-7890" onChange={handleChange} value={data.phone} />
-    </div>
-    <div className="forminput">
-        <label htmlFor="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="********" onChange={handleChange} value={data.password} />
-    </div>
-    <div className="forminput">
-        <label htmlFor="address">Address</label>
-        <input type="text" id="address" name="address" placeholder="123 Main St, City" onChange={handleChange} value={data.address} />
-    </div>
-    <div className="forminput">
-        <label htmlFor="idNumber">ID Number</label>
-        <input type="text" id="idNumber" name="idNumber" placeholder="ID123456" onChange={handleChange} value={data.idNumber} />
-    </div>
-    <div className="forminput">
-        <label htmlFor="rank">Rank</label>
-        <input type="text" id="rank" name="rank" placeholder="Admin" onChange={handleChange} value={data.rank} />
-    </div>
-    <div className="forminput">
-        <label htmlFor="badgeNumber">Badge Number</label>
-        <input type="text" id="badgeNumber" name="badgeNumber" placeholder="123" onChange={handleChange} value={data.badgeNumber} />
-    </div>
+                                <label htmlFor="title">Title</label>
+                                <input type="text" id="title" name="title" placeholder="Title" onChange={handleChange} value={data.title} />
+                            </div>
+                            <div className="forminput">
+                                <label htmlFor="descreption">descreption</label>
+                                <textarea id="descreption" name="descreption" placeholder="descreption" onChange={handleChange} value={data.descreption} />
+                            </div>
                             <button type="submit">Send</button>
                         </form>
                     </div>
@@ -195,4 +153,4 @@ const Newadmin = () => {
     );
 }
 
-export default Newadmin;
+export default NewPost;

@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const User = require("../models/User");
-const Reclamation = require("../models/reclamation");
+const Reclamation = require("../models/Reclamation");
 
 router.post("/reclamation", async (req, res) => {
     try {
@@ -20,7 +20,7 @@ router.post("/reclamation", async (req, res) => {
 });
 router.put("/updaterec/:reclamationId", async (req, res) => {
     try {
-        const { state, response } = req.body;
+        const { state,response} = req.body;
         const reclamationId = req.params.reclamationId;
 
         // Find the reclamation by ID
@@ -32,9 +32,9 @@ router.put("/updaterec/:reclamationId", async (req, res) => {
         }
 
         // Update the reclamation fields
-        
         reclamation.state = state;
         reclamation.response = response;
+      
 
         // Save the updated reclamation
         const updatedReclamation = await reclamation.save();
@@ -46,6 +46,47 @@ router.put("/updaterec/:reclamationId", async (req, res) => {
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 });
+
+router.put("/updateadmin/:adminId", async (req, res) => {
+    try {
+        const { email,nom_complet, phone, address } = req.body;
+        const adminId = req.params.adminId;
+
+        // Find the admin by ID
+        const admin = await Admin.findById(adminId);
+
+        // Check if the admin exists
+        if (!admin) {
+            return res.status(404).json({ message: "Admin not found" });
+        }
+
+        // Update the admin fields
+        admin.email = email;
+        admin.nom_complet = nom_complet;
+        admin.phone = phone;
+        admin.address = address;
+       
+
+        // Save the updated admin
+        const updatedAdmin = await admin.save();
+
+        // Send response with the updated admin
+        res.status(200).json({ admin: updatedAdmin });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+});
+router.get('/allreclamations', async (req, res) => {
+    try {
+      const reclamations = await Reclamation.find();
+      res.json({ reclamations });
+    } catch (error) {
+      console.error('Failed to fetch all reclamations:', error);
+      res.status(500).json({ message: 'Failed to fetch all reclamations' });
+    }
+  });
+
 router.get("/getreclamation/:id", async (req, res) => {
     try {
         const reclamations = await Reclamation.find({ user: req.params.id });

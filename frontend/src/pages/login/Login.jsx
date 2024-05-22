@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { toast } from 'react-toastify'; 
 import 'react-toastify/dist/ReactToastify.css'; 
-import "./login.scss"; 
-import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux'; 
 import { authActions } from '../../store';
+import "./login.scss"
 
-const Lgform = () => {
+const Login = () => {
   const navigate = useNavigate(); 
   const dispatch = useDispatch();
   const [inputs, setInputs] = useState({
     email: "",
-    number: "",
+    password: "",
   });
   const [submitted, setSubmitted] = useState(false);
 
@@ -29,39 +28,45 @@ const Lgform = () => {
     e.preventDefault();
     setSubmitted(true); 
 
-    
-    if (!inputs.email || !inputs.number) {
-      toast.error('Please enter both email and number');
+    if (!inputs.email || !inputs.password) {
+      toast.error('Please enter both email and password');
       return;
     }
 
     try {
-      const response = await axios.post("http://localhost:1000/api/v1/login", inputs);
-      sessionStorage.setItem("id", response.data.others._id);
+      const response = await axios.post("http://localhost:2000/api/v5/admin/login", inputs);
+      const { message, admin } = response.data;
+      console.log(admin)
+      sessionStorage.setItem("id", admin._id);
       dispatch(authActions.login());
-      navigate("/main");
-      toast.success('Login successful');
+      navigate("/home");
+      toast.success(message);
     } catch (error) {
       console.error("Error during login:", error);
-      toast.error('svp assurer que vous avez entrée votre information correctement');
+      toast.error('Please make sure you have entered your information correctly');
     }
   };
 
   return (
-    <div className='lg'>
+    <div className="container">
       <form className="form" onSubmit={handleSubmit}>
-        <p className="title">Sign in</p>
-        <input placeholder="Numero tel" type="text" name="number" className={`email ${submitted && !inputs.number && 'required'}`} onChange={handleChange} value={inputs.number} required />
-        <input placeholder="E-mail" type="text" name="email" className={`email ${submitted && !inputs.email && 'required'}`} onChange={handleChange} value={inputs.email} required />
-        <p className="text">No account? <Link to="/">Create one!</Link></p>
-        <p className="text">Can't access your account?<a>contact-us</a></p>
-        <div className="button_row">
-          <Link to="/"> <button className="button secondary_button">Back</button> </Link>
-          <button type="submit" className="button primary_button">Next</button>
+       
+        <div className="input-container">
+          <input type="email" name="email" placeholder="Enter email" onChange={handleChange} value={inputs.email} required/>
         </div>
+        <div className="input-container">
+          <input type="password" name="password" placeholder="Enter password" onChange={handleChange} value={inputs.password} required />
+        </div>
+        <button type="submit" className="submit">
+          Sign in
+        </button>
+        <p className="signup-link">
+          No account?
+          <Link to="/signup">Sign up</Link>
+        </p>
       </form>
     </div>
   );
 }
 
-export default Lgform;
+export default Login;

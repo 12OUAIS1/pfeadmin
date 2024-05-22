@@ -6,6 +6,7 @@ const offre = require("./routes/offre");
 const reclamation = require("./routes/reclamation");
 const admin = require("./routes/admin");
 const image = require("./routes/image")
+const post = require("./routes/post")
 const cors = require('cors'); 
 app.use("/uploads",express.static("./uploads"))
 require("./cnx/cnx");
@@ -20,6 +21,7 @@ app.use("/api/v2",card);
 app.use("/api/v3",offre);
 app.use("/api/v4",reclamation);
 app.use("/api/v5",admin);
+app.use("/api/v7",post);
 app.use("/api/v6",image);
 
 app.listen(2000,() => {

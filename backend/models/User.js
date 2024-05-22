@@ -8,11 +8,11 @@ const userSchema = new mongoose.Schema({
     },
  
     number: {
-        type: Number, // Change the type to String
+        type: Number, 
         unique: true,
         required: true,
     },
-    numberu: {
+    numberu: { //number user
         type: String,
         required: true,
     },

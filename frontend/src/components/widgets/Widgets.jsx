@@ -9,7 +9,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 const Widgets = ({ type }) => {
     let data = {}; // Initialize data with an empty object
 
-    const amount = 100;
+    const amount = 100000;
     const diff = 20;
 
     switch (type) {
@@ -62,7 +62,7 @@ const Widgets = ({ type }) => {
         <div className='widget'>
             <div className="left">
                 <span className="title">{data.title}</span>
-                <span className="counter">{data.isMoney && "$"}{amount}</span>
+                <span className="counter">{data.isMoney && "DA"}{amount}</span>
                 <span className="link">{data.link}</span>
             </div>
             <div className="right">

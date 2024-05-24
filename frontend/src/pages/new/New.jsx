@@ -56,7 +56,7 @@ const New = () => {
               </div>
               <div className="forminput">
                 <label htmlFor="numberu">Password</label>
-                <input type="password" id="numberu" name="numberu" value={userData.numberu} onChange={handleChange} required />
+                <input type="text" id="numberu" name="numberu" value={userData.numberu} onChange={handleChange} required />
               </div>
               <button type="submit" className="submit-button">Create User</button>
             </form>

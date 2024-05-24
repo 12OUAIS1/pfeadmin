@@ -22,7 +22,7 @@ const columns = [
         try {
           await axios.delete(`http://localhost:2000/api/v1/deleteuser/${params.id}`);
           toast.success("User deleted successfully");
-          window.location.reload(); // Refresh the page after deletion
+          window.location.reload();
         } catch (error) {
           console.error('Error deleting user:', error.response.data);
           toast.error("Failed to delete user");

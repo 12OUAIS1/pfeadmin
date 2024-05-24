@@ -38,7 +38,7 @@ function App() {
    <Route path="/new" element={<New />} />
    <Route path="/rec" element={<Rec />} />
    <Route path="/single" element={<Single />} />
-   <Route path="/newadmin" element={<Newadmin />} />
+   <Route path="/newadmin" element={<Newadmin />} /> 
    <Route path="/adata" element={<Adata />} />
    <Route path="/singleadmin" element={<Singleadmin/>} />
    <Route path="/offre" element={<Offre/>} />
@@ -46,6 +46,8 @@ function App() {
    <Route path="/npost" element={<NewPost/>} />
    <Route path="/stats" element={<Stats/>} />
    <Route path="/post" element={<Post/>} />
+   <Route path="/np" element={<NewPost/>} />
+
 </Routes>
 </BrowserRouter>
    </div>

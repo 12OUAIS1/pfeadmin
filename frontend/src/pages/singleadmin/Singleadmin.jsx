@@ -4,11 +4,11 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
 import Chart from "../../components/chart/Chart";
 import List from "../../components/table/Table";
-import './singleadmin.scss'; // Import your SCSS file
+import './singleadmin.scss'; 
 
 const Single = () => {
   const [adminData, setAdminData] = useState(null);
-  const [editMode, setEditMode] = useState(false); // State to track edit mode
+  const [editMode, setEditMode] = useState(false); 
   const [formData, setFormData] = useState({
     email: '',
     nom_complet: '',
@@ -16,12 +16,12 @@ const Single = () => {
     address: '',
     photo: null
   });
-  const [editingAdmin, setEditingAdmin] = useState(null); // State to store admin being edited
+  const [editingAdmin, setEditingAdmin] = useState(null); 
 
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        // Fetch logged admin data
+       
         const adminResponse = await axios.get(`http://localhost:2000/api/v5/admin/${sessionStorage.getItem('id')}`);
         setAdminData(adminResponse.data);
       } catch (error) {
@@ -30,7 +30,7 @@ const Single = () => {
     };
 
     fetchAdminData();
-  }, []); // Run only once on component mount
+  }, []); 
 
   const toggleEditMode = () => {
     setEditMode(!editMode);
@@ -60,7 +60,7 @@ const Single = () => {
         return;
       }
       
-      // Create form data to send with axios
+      
       const formDataToSend = new FormData();
       formDataToSend.append('email', formData.email);
       formDataToSend.append('nom_complet', formData.nom_complet);
@@ -68,13 +68,12 @@ const Single = () => {
       formDataToSend.append('address', formData.address);
       formDataToSend.append('photo', formData.photo);
 
-      // Send PUT request to update admin info
+   
       const response = await axios.put(`http://localhost:2000/api/v5/updateadmin/${editingAdmin._id}`, formDataToSend);
-      console.log('Server response:', response.data); // Log server response
-      // Fetch updated admin data
+      console.log('Server response:', response.data); 
       const updatedAdminResponse = await axios.get(`http://localhost:2000/api/v5/admin/${sessionStorage.getItem('id')}`);
       setAdminData(updatedAdminResponse.data);
-      // Disable edit mode after successful update
+      
       setEditMode(false);
     } catch (error) {
       console.error('Error updating admin data:', error);

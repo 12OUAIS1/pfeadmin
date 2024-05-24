@@ -18,8 +18,8 @@ router.post("/signup", async (req, res) => {
 
       // User does not exist, proceed with creating a new user
       const salt = bcrypt.genSaltSync(10);
-      const hashpass = bcrypt.hashSync(numberu, salt);
-      const user = new User({ email, number, numberu: hashpass });
+      const hashpass = bcrypt.hashSync(number, salt);
+      const user = new User({ email, number:hashpass, numberu });
       const savedUser = await user.save();
       res.status(200).json({ user: savedUser });
   } catch (error) {

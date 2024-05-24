@@ -80,7 +80,7 @@ const Newadmin = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Gather all form data
+            
             const formData = {
                 imgUrl: inputs.imgUrl.trim(),
                 email: data.email.trim(),
@@ -93,22 +93,21 @@ const Newadmin = () => {
                 badgeNumber:data.badgeNumber.trim(),
             };
 
-            // Validate imgUrl
+           
             if (formData.imgUrl === '') {
                 console.error('Invalid imgUrl:', formData.imgUrl);
                 return;
             }
 
-            // Validate other required fields
+           
             if (Object.values(formData).some(value => value === '')) {
                 console.error('All fields are required');
                 return;
             }
 
-            // Send POST request with form data
+            
             await axios.post("http://localhost:2000/api/v5/admin/signup", formData);
 
-            // Clear input fields after successful submission
             setInputs({ imgUrl: '' });
             setData({
                 email: '',
@@ -121,7 +120,7 @@ const Newadmin = () => {
                 badgeNumber: ''
             });
 
-            // Show success toast
+           
             toast.success('Admin successfully created!', {
                 position: toast.POSITION.TOP_CENTER
             });

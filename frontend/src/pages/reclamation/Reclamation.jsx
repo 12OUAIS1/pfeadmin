@@ -1,4 +1,4 @@
-// In your frontend code (UserReclamations.js)
+
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -54,7 +54,7 @@ const UserReclamations = () => {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
 
-    // Check if state or response is empty
+    
     if (!editingReclamation.state || !editingReclamation.response) {
       toast.error('Please fill in all fields');
       return;

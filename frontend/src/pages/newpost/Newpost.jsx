@@ -13,7 +13,7 @@ const NewPost = () => {
     const [file, setFile] = useState(null);
     const [imgperc, setImageperc] = useState(0);
     const [inputs, setInputs] = useState({
-        imgUrl: '' // Initialize imgUrl as an empty string
+        imgUrl: '' 
     });
     const [data, setData] = useState({
         title: "",
@@ -81,7 +81,7 @@ const NewPost = () => {
                 descreption: data.descreption.trim()
             };
 
-            // Validate imgUrl
+          
             if (formData.imgUrl === '') {
                 console.error('Invalid imgUrl:', formData.imgUrl); 
                 return;

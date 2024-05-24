@@ -7,7 +7,7 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
 const Widgets = ({ type }) => {
-    let data = {}; // Initialize data with an empty object
+    let data = {}; 
 
     const amount = 100000;
     const diff = 20;

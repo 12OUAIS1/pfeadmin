@@ -26,7 +26,7 @@ const Sidebar = () => {
         console.log('User data response:', response.data.rank);
         setAdminrank(response.data.rank);
         
-        // Dispatch action to update user role in Redux state
+        
         dispatch({ type: 'SET_USER_ROLE', payload: response.data.rank });
       } catch (error) {
         console.error('Failed to fetch user role:', error);
@@ -62,7 +62,7 @@ const Sidebar = () => {
             <li><GppMaybeIcon className='icons' /><span>reclamation</span></li>
           </Link>
 
-          <Link to="/post" style={{ textDecoration: "none" }}>
+          <Link to="/post" style={{ textDecoration: "none" }}> 
             <li><NewspaperIcon className='icons' /><span>posts</span></li>
           </Link>
 

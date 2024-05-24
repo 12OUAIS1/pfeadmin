@@ -1,0 +1,168 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import app from '../../firebase'; // Import Firebase configuration
+import './feposter.scss';
+
+function Post({ post, onDelete, onEdit }) {
+  const [posts, setPosts] = useState([]);
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('http://localhost:2000/api/v7/post/allposts');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setPosts(data.posts);
+    } catch (error) {
+      console.error('Failed to fetch posts:', error);
+      toast.error('Failed to fetch posts');
+    }
+  };
+
+  return (
+    <div className="post-card">
+      <img src={posts.imgUrl} alt={posts.title} className="post-img" />
+      <div className="post-content">
+        <h3 className="post-title">{posts.title}</h3>
+        <p className="post-description">{posts.description}</p>
+        <div className="post-actions">
+          <button onClick={() => onEdit(posts)} className="action-button">Edit</button>
+          <button onClick={() => onDelete(posts._id)} className="action-button">Delete</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Fepost() {
+  
+  const [file, setFile] = useState(null);
+  const [imgPerc, setImagePerc] = useState(0);
+  const [inputs, setInputs] = useState({ imgUrl: '', title: '', description: '' });
+  const [editingPost, setEditingPost] = useState(null);
+  const [posts, setPosts] = useState([]);
+
+  const uploadFile = (file) => {
+    const storage = getStorage(app);
+    const storageRef = ref(storage, `images/${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setImagePerc(Math.round(progress));
+      },
+      (error) => {
+        console.log("Upload Error:", error);
+      },
+      async () => {
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        setInputs((prev) => ({ ...prev, imgUrl: downloadURL }));
+      }
+    );
+  };
+
+  useEffect(() => {
+    if (file) {
+      uploadFile(file);
+    }
+  }, [file]);
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setInputs((prevInputs) => ({
+      ...prevInputs,
+      [name]: value
+    }));
+  };
+
+  const handleDeletePost = async (postId) => {
+    try {
+      const response = await fetch(`http://localhost:2000/api/v7/post/deletepost/${postId}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      setPosts(posts.filter(post => post._id !== postId));
+      toast.success('Post deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete post:', error);
+      toast.error('Failed to delete post');
+    }
+  };
+
+  const handleEditPost = (post) => {
+    setEditingPost(post);
+    setInputs({ imgUrl: post.imgUrl, title: post.title, description: post.description });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!inputs.imgUrl || !inputs.title || !inputs.description) {
+      toast.error('All fields are required');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:2000/api/v7/post/updatepost/${editingPost._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inputs)
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const updatedPost = await response.json();
+      setPosts(posts.map(post => post._id === editingPost._id ? updatedPost : post));
+      setEditingPost(null);
+      setInputs({ imgUrl: '', title: '', description: '' });
+      toast.success('Post updated successfully');
+    } catch (error) {
+      console.error('Failed to update post:', error);
+      toast.error('Failed to update post');
+    }
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8 relative">
+      <Link to="/npost" className="new-post-button bg-blue-500 text-white px-4 py-2 rounded">New Post</Link>
+      <div className="post-container">
+        {posts.map(post => (
+          <div key={post._id} className="post-card">
+            <Post
+              post={post}
+              onDelete={handleDeletePost}
+              onEdit={handleEditPost}
+            />
+          </div>
+        ))}
+      </div>
+      {editingPost && (
+        <div className="edit-modal">
+          <form onSubmit={handleSubmit} className="edit-form">
+            <h3>Edit Post</h3>
+            <input type="text" name="title" value={inputs.title} onChange={handleChange} placeholder="Title" required />
+            <input type="text" name="description" value={inputs.description} onChange={handleChange} placeholder="Description" required />
+            <input type="file" onChange={handleFileChange} />
+            {imgPerc > 0 && <p>Uploading: {imgPerc}%</p>}
+            <button type="submit" className="submit-button">Save</button>
+            <button type="button" className="cancel-button" onClick={() => setEditingPost(null)}>Cancel</button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
